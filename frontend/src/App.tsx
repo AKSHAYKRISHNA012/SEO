@@ -4,6 +4,11 @@ import { LandingPage } from './components/LandingPage';
 import { AuditDashboard } from './components/AuditDashboard';
 import type { AuditResponse } from './types/audit';
 
+// In production (Vercel), VITE_API_URL points to Render backend
+// In dev, use relative /api (proxied by Vite to localhost:8000)
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
+const apiUrl = (path: string) => `${API_BASE}${path}`;
+
 export function App() {
   const [currentAudit, setCurrentAudit] = useState<AuditResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -13,7 +18,7 @@ export function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/analyze', {
+      const res = await fetch(apiUrl('/api/analyze'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
@@ -37,7 +42,7 @@ export function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/audit/${id}`);
+      const res = await fetch(apiUrl(`/api/audit/${id}`));
       if (!res.ok) throw new Error('Audit record not found.');
       const data: AuditResponse = await res.json();
       setCurrentAudit(data);
